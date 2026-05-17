@@ -1,0 +1,12 @@
+name: SkillTree
+version: '1.0.0'
+main: dev.crysscoder.skilltree.SkillTree
+api-version: '1.20'
+commands:
+  skilltree:
+    usage: /skilltree
+    description: Opens the skill tree menu
+    permission: skilltree.admin
+permissions:
+  skilltree.admin:
+    default: op
