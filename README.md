@@ -1,6 +1,18 @@
+<div align="center">
+
 # SkillTree
 
+![Release](https://img.shields.io/github/v/release/crysscoder/skill-tree?style=flat-square&label=release)
+![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Paper](https://img.shields.io/badge/Paper-1.20.1-2ea44f?style=flat-square)
+![MySQL](https://img.shields.io/badge/MySQL-required-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![Issues](https://img.shields.io/github/issues/crysscoder/skill-tree?style=flat-square)
+
 Paper-плагин с ветками навыков, заданиями и сохранением прогресса в MySQL.
+
+[Release](https://github.com/crysscoder/skill-tree/releases/latest) · [Issues](https://github.com/crysscoder/skill-tree/issues) · [CodeAdapter](https://codeadapter.ru)
+
+</div>
 
 ## Что делает
 
@@ -13,10 +25,12 @@ Paper-плагин с ветками навыков, заданиями и со�
 
 ## Версии
 
-- плагин: `1.0.0`
-- сервер: Paper `1.20.1`
-- API: `1.20.1-R0.1-SNAPSHOT`
-- Java: `17`
+| Компонент | Версия |
+| --- | --- |
+| Plugin | `1.0.0` |
+| Java | `17` |
+| Paper | `1.20.1` |
+| Paper API | `1.20.1-R0.1-SNAPSHOT` |
 
 ## Команды
 
@@ -28,7 +42,7 @@ Paper-плагин с ветками навыков, заданиями и со�
 ## Permission
 
 - `skilltree.admin`
-- по умолчанию доступно op
+- по умолчанию доступно `op`
 
 ## Сборка
 
