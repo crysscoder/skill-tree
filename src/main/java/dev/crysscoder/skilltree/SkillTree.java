@@ -13,6 +13,7 @@ import dev.crysscoder.skilltree.service.GuiService;
 import dev.crysscoder.skilltree.storage.MySqlStorage;
 
 public final class SkillTree extends JavaPlugin {
+    private MySqlStorage mySqlStorage;
 
     @Override
     public void onEnable() {
@@ -22,8 +23,7 @@ public final class SkillTree extends JavaPlugin {
         final ConfigManager configManager = new ConfigManager(this);
         configManager.load(getConfig());
 
-        final MySqlStorage mySqlStorage = new MySqlStorage(this);
-        mySqlStorage.initDatabase();
+        mySqlStorage = new MySqlStorage(this);
 
 
         final ChallengeManager challengeManager = new ChallengeManager(configManager, mySqlStorage);
@@ -60,4 +60,10 @@ public final class SkillTree extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PotionDamageEntityEvent(mySqlStorage, eventManager, challengeManager), this);
     }
 
+    @Override
+    public void onDisable() {
+        if (mySqlStorage != null) {
+            mySqlStorage.shutdown();
+        }
+    }
 }

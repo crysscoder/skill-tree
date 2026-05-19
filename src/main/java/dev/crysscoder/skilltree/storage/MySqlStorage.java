@@ -2,7 +2,6 @@ package dev.crysscoder.skilltree.storage;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import dev.crysscoder.skilltree.data.PlayerData;
 import dev.crysscoder.skilltree.data.Task;
@@ -25,9 +24,7 @@ public class MySqlStorage implements Storage {
 
     public MySqlStorage(JavaPlugin plugin) {
         this.plugin = plugin;
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            setupDataSource();
-        });
+        setupDataSource();
     }
 
     public void setupDataSource() {
@@ -54,36 +51,34 @@ public class MySqlStorage implements Storage {
 
 
     public void initDatabase() {
-        CompletableFuture.runAsync(() -> {
-            String playersSql = """
-                        CREATE TABLE IF NOT EXISTS players (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            player_name VARCHAR(36) UNIQUE NOT NULL,
-                            class VARCHAR(20),
-                            progress INT DEFAULT 0
-                        );
-                    """;
+        String playersSql = """
+                    CREATE TABLE IF NOT EXISTS players (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        player_name VARCHAR(36) UNIQUE NOT NULL,
+                        class VARCHAR(20),
+                        progress INT DEFAULT 0
+                    );
+                """;
 
-            String tasksSql = """
-                        CREATE TABLE IF NOT EXISTS tasks (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            player_id INT NOT NULL,
-                            task_name VARCHAR(255) NOT NULL,
-                            challenge_id VARCHAR(255) NOT NULL,
-                            status VARCHAR(20) DEFAULT 'NOT_STARTED',
-                            progress INT DEFAULT 0,
-                            FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
-                        );
-                    """;
+        String tasksSql = """
+                    CREATE TABLE IF NOT EXISTS tasks (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        player_id INT NOT NULL,
+                        task_name VARCHAR(255) NOT NULL,
+                        challenge_id VARCHAR(255) NOT NULL,
+                        status VARCHAR(20) DEFAULT 'NOT_STARTED',
+                        progress INT DEFAULT 0,
+                        FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+                    );
+                """;
 
-            try (Connection conn = dataSource.getConnection();
-                 Statement st = conn.createStatement()) {
-                st.executeUpdate(playersSql);
-                st.executeUpdate(tasksSql);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }, executorService);
+        try (Connection conn = dataSource.getConnection();
+             Statement st = conn.createStatement()) {
+            st.executeUpdate(playersSql);
+            st.executeUpdate(tasksSql);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -98,7 +93,7 @@ public class MySqlStorage implements Storage {
                         return new PlayerData(
                                 rs.getInt("id"),
                                 rs.getString("player_name"),
-                                Skill.valueOf(rs.getString("class").toUpperCase()),
+                                parseSkill(rs.getString("class")),
                                 rs.getInt("progress")
                         );
                     }
@@ -122,7 +117,7 @@ public class MySqlStorage implements Storage {
                         return new PlayerData(
                                 rs.getInt("id"),
                                 rs.getString("player_name"),
-                                Skill.valueOf(rs.getString("class").toUpperCase()),
+                                parseSkill(rs.getString("class")),
                                 rs.getInt("progress")
                         );
                     }
@@ -194,7 +189,7 @@ public class MySqlStorage implements Storage {
                                 rs.getInt("player_id"),
                                 rs.getString("task_name"),
                                 rs.getString("challenge_id"),
-                                Status.valueOf(rs.getString("status").toUpperCase()),
+                                parseStatus(rs.getString("status")),
                                 rs.getInt("progress")
                         );
                     }
@@ -221,7 +216,7 @@ public class MySqlStorage implements Storage {
                                 rs.getInt("player_id"),
                                 rs.getString("task_name"),
                                 rs.getString("challenge_id"),
-                                Status.valueOf(rs.getString("status").toUpperCase()),
+                                parseStatus(rs.getString("status")),
                                 rs.getInt("progress")
                         ));
                     }
@@ -249,7 +244,7 @@ public class MySqlStorage implements Storage {
                                 rs.getInt("player_id"),
                                 rs.getString("task_name"),
                                 rs.getString("challenge_id"),
-                                Status.valueOf(rs.getString("status").toUpperCase()),
+                                parseStatus(rs.getString("status")),
                                 rs.getInt("progress")
                         ));
                     }
@@ -345,5 +340,30 @@ public class MySqlStorage implements Storage {
             }
             return 0;
         }, executorService);
+    }
+
+    public void shutdown() {
+        executorService.shutdownNow();
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+        }
+    }
+
+    private Skill parseSkill(String value) {
+        if (value == null) return Skill.SOME_DEFAULT;
+        try {
+            return Skill.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Skill.SOME_DEFAULT;
+        }
+    }
+
+    private Status parseStatus(String value) {
+        if (value == null) return Status.NOT_STARTED;
+        try {
+            return Status.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Status.NOT_STARTED;
+        }
     }
 }
